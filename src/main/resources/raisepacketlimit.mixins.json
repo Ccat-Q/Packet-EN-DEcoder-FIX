@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.ccatq.raisepacketlimit.mixin",
+  "mixins": [
+    "CompressionEncoderMixin",
+    "CompressionDecoderMixin",
+    "Varint21LengthFieldPrependerMixin",
+    "Varint21FrameDecoderMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

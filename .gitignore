@@ -1,0 +1,32 @@
+# Gradle
+.gradle/
+build/
+out/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+bin/
+
+# NeoForge / Minecraft runs
+run/
+logs/
+crash-reports/
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Local config (never commit secrets)
+local.properties
+
+# Local tooling / working dirs (never commit)
+.omo/
+.codegraph/
+.tmp-*/
+session-ses_fed3.md
