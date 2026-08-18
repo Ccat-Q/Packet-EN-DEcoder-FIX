@@ -43,9 +43,6 @@ neoForge {
             server()
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-            // TEMP verification: mixin apply logging
-            systemProperty 'mixin.debug.verbose', 'true'
-            systemProperty 'mixin.debug', 'true'
         }
 
         gameTestServer {
