@@ -59,7 +59,7 @@ maxPacketSize = 67108864
 
 ## 验证命令（可选）
 
-管理员执行：`/testbigpacket` 或 `/testbigpacket 16`（发送约 16 MiB 的测试包）
+任意玩家（无需管理员权限，只作用于自己）执行：`/testbigpacket` 或 `/testbigpacket 16`（发送约 16 MiB 的测试包）
 
 - 命令向执行者发送一个**原版** `container_set_content` 数据包（其内容为若干携带大 NBT 的物品，
   总大小约等于请求的 MiB 数），发送后立即恢复真实背包显示。

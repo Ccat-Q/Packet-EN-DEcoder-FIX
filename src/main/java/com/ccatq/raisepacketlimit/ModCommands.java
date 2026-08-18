@@ -52,8 +52,8 @@ public final class ModCommands {
 
     @SubscribeEvent
     public static void registerCommands(RegisterCommandsEvent event) {
+        // No permission requirement: any in-game player may test on themselves.
         event.getDispatcher().register(Commands.literal("testbigpacket")
-                .requires(source -> source.hasPermission(2))
                 .executes(ctx -> sendBigPacket(ctx, 4))
                 .then(Commands.argument("megabytes", IntegerArgumentType.integer(3, MAX_MIB))
                         .executes(ctx -> sendBigPacket(ctx, IntegerArgumentType.getInteger(ctx, "megabytes")))));
