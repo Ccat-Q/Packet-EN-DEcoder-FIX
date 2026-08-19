@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
  * packet. A 5-byte varint covers up to 2^35-1 bytes, far beyond the maximum
  * configurable packet size, so this is a fixed constant.
  */
-@Mixin(Varint21LengthFieldPrepender.class)
+@Mixin(value = Varint21LengthFieldPrepender.class, priority = 1100)
 public abstract class Varint21LengthFieldPrependerMixin {
     /** Maximum varint bytes needed for any frame up to the config ceiling (512 MiB). */
     private static final int MAX_VARINT_BYTES = 5;

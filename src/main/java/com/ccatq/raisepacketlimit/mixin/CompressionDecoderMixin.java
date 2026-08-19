@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
  * than protocol maximum of 8388608". Replaced with the configured max packet
  * size (default 67108864 = 64 MiB).
  */
-@Mixin(CompressionDecoder.class)
+@Mixin(value = CompressionDecoder.class, priority = 1100)
 public abstract class CompressionDecoderMixin {
     @ModifyConstant(method = "decode", constant = @Constant(intValue = 8388608))
     private int raisepacketlimit$maxDecompressedSize(int original) {

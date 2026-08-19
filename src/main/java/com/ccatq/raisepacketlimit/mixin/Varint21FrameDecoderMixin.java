@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
  * frames larger than 2 MiB (e.g. the AE2 container_set_content case) can be
  * received. 5 bytes covers up to 2^35-1 bytes, far beyond the config ceiling.
  */
-@Mixin(Varint21FrameDecoder.class)
+@Mixin(value = Varint21FrameDecoder.class, priority = 1100)
 public abstract class Varint21FrameDecoderMixin {
     /** Maximum varint bytes accepted for an inbound frame length. */
     private static final int MAX_VARINT_BYTES = 5;

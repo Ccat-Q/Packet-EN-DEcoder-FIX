@@ -75,7 +75,7 @@ maxPacketSize = 67108864
 | 客户端收到大包被踢：`DecoderException` / `CorruptedFrameException: length wider than 21-bit` | 客户端未装本模组（或配置小于服务端） | 客户端安装本模组，配置与服务端一致 |
 | 服务端报 `Packet too big (is X, should be less than 8388608)` | `CompressionEncoder` 8 MiB 输入上限 | 已由本模组解除（受 `maxPacketSize` 控制） |
 | 两端都装了仍被踢 | 配置不一致 / 未重启 / 装了但被其他代理（如 Velocity）拦截 | 对齐两端配置、重启；Velocity 的 `max-packet-size` 也调到 ≥ 67108864 |
-| 与 PacketFixer 同装 | 无冲突 | 本模组与 PacketFixer 互不依赖，可共存 |
+| 与 PacketFixer 同装 | 无功能冲突 | 本模组与 PacketFixer 互不依赖，可共存；本模组 4 个 Mixin 均设 `priority = 1100`，对同一闸门的修改始终以本模组的值为准（日志里可能有一条 "ModifyConstant conflict ... Skipping packetfixer ..." 的 WARN，属正常，无需处理） |
 
 ## 构建
 
@@ -97,6 +97,8 @@ gradlew build
 - 配置通过 `ModConfigSpec`（`mods.toml` 注册，`config/raisepacketlimit.toml`），
   Mixin 读取静态持有类 `PacketSizeLimits` 的值（默认即 64 MiB，配置加载后同步）。
 - `mixin 配置 defaultRequire = 0`：个别环境目标缺失时仅告警，不崩溃。
+- 4 个 Mixin 均设置 `priority = 1100`（高于 PacketFixer 的 1001 与默认值 1000）：
+  与 PacketFixer 同时安装时，对同一闸门的注入以本模组为准，行为确定且不受 PacketFixer 配置影响。
 - **无 refmap**：NeoForge 1.21 开发与运行环境均为 Mojang 官方映射（mojmap），
   mixin 目标名处处一致，refmap 无意义（见 NeoForge 官方 1.21 迁移说明），
   因此构建不启用 mixin 注解处理器，jar 内不包含 refmap——这是正常且推荐的做法。

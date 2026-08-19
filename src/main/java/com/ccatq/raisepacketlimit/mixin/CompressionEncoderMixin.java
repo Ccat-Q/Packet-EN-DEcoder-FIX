@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
  * compression with "Packet too big (is X, should be less than 8388608)".
  * Replaced with the configured max packet size (default 67108864 = 64 MiB).
  */
-@Mixin(CompressionEncoder.class)
+@Mixin(value = CompressionEncoder.class, priority = 1100)
 public abstract class CompressionEncoderMixin {
     @ModifyConstant(method = "encode", constant = @Constant(intValue = 8388608))
     private int raisepacketlimit$maxPreCompressionSize(int original) {
