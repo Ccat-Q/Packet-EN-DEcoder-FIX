@@ -2,7 +2,7 @@
 
 一个 NeoForge 1.21.1 模组：解除 Minecraft 原版网络包 2 MiB 大小硬上限，默认提升到 **64 MiB**（可配置）。
 
-适用 NeoForge **21.1.247**（`net.neoforged:neoforge` 版本范围 `[21.1.247,)`）。
+适用 NeoForge **21.1.243**（`net.neoforged:neoforge` 版本范围 `[21.1.243,)`）。
 
 ## 解决什么问题
 
@@ -41,7 +41,7 @@ Failed to encode packet 'clientbound/minecraft:container_set_content'
 **服务端和客户端都必须安装本模组**，且 `maxPacketSize` 两边要一致：
 
 1. 把 `raisepacketlimit-1.0.0.jar` 放入服务端的 `mods/` 目录。
-2. 把同一个 jar 放入客户端的 `mods/` 目录（启动器需使用 NeoForge 21.1.247 及以上）。
+2. 把同一个 jar 放入客户端的 `mods/` 目录（启动器需使用 NeoForge 21.1.243 及以上）。
 3. 启动两端，确认配置生成：`config/raisepacketlimit.toml`。
 4. 修改配置后**必须重启**两端才生效。
 5. 兼容 Fabric/Paper 等其他加载器的同类修复可并存，本模组不依赖 PacketFixer。
