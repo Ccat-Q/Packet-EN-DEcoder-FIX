@@ -1,6 +1,6 @@
 # Raise Packet Limit（raisepacketlimit）
 
-一个 NeoForge 1.21.1 模组：解除 Minecraft 原版网络包 2 MiB 大小硬上限，默认提升到 **64 MiB**（可配置）。
+一个 NeoForge 1.21.1 模组：解除 Minecraft 原版网络包 2 MiB 大小硬上限，并整合 Packet Fixer 的 NBT、自定义 Payload、区块数据、字符串与超时兼容功能。默认使用 **64 MiB** 的受限配置。
 
 适用 NeoForge **21.1.243**（`net.neoforged:neoforge` 版本范围 `[21.1.243,)`）。
 
@@ -38,23 +38,37 @@ Failed to encode packet 'clientbound/minecraft:container_set_content'
 
 ## 安装
 
-**服务端和客户端都必须安装本模组**，且 `maxPacketSize` 两边要一致：
+**服务端和客户端都必须安装本模组**，且所有网络大小配置两边要一致。此模组已整合 Packet Fixer，**不要再安装 Packet Fixer**，以避免重复 Mixin 注入：
 
-1. 把 `raisepacketlimit-1.0.0.jar` 放入服务端的 `mods/` 目录。
+1. 把 `raisepacketlimit-1.1.0.jar` 放入服务端的 `mods/` 目录。
 2. 把同一个 jar 放入客户端的 `mods/` 目录（启动器需使用 NeoForge 21.1.243 及以上）。
 3. 启动两端，确认配置生成：`config/raisepacketlimit.toml`。
 4. 修改配置后**必须重启**两端才生效。
-5. 兼容 Fabric/Paper 等其他加载器的同类修复可并存，本模组不依赖 PacketFixer。
+5. 兼容 Fabric/Paper 等其他加载器的同类修复可并存；NeoForge 环境中不应再同时安装 Packet Fixer。
 
 ## 配置
 
-文件：`config/raisepacketlimit.toml`
+文件：`config/raisepacketlimit.toml`。默认值是安全上限，不采用 Packet Fixer 的无限制默认行为；过高设置会增加恶意客户端导致内存耗尽的风险。
 
 ```toml
 [general]
 # 单个网络包的最大字节数（压缩前，双向）。默认 67108864 = 64 MiB。
 # 范围：2097152（2 MiB，原版值）~ 536870912（512 MiB）。
 maxPacketSize = 67108864
+
+# Packet Fixer 兼容项：默认 64 MiB。
+maxNbtBytes = 67108864
+maxCustomPayloadBytes = 67108864
+maxChunkDataBytes = 67108864
+
+# 默认维持原版 32767；只有确认相关模组需要时再提高。
+maxStringLength = 32767
+
+# 大型注册表或数据包传输时的连接/心跳超时，单位秒。
+connectionTimeoutSeconds = 120
+
+# 危险：将 NBT 实例配额替换为 maxNbtBytes，默认关闭。
+forceUnlimitedNbt = false
 ```
 
 ## 验证命令（可选）
@@ -75,7 +89,7 @@ maxPacketSize = 67108864
 | 客户端收到大包被踢：`DecoderException` / `CorruptedFrameException: length wider than 21-bit` | 客户端未装本模组（或配置小于服务端） | 客户端安装本模组，配置与服务端一致 |
 | 服务端报 `Packet too big (is X, should be less than 8388608)` | `CompressionEncoder` 8 MiB 输入上限 | 已由本模组解除（受 `maxPacketSize` 控制） |
 | 两端都装了仍被踢 | 配置不一致 / 未重启 / 装了但被其他代理（如 Velocity）拦截 | 对齐两端配置、重启；Velocity 的 `max-packet-size` 也调到 ≥ 67108864 |
-| 与 PacketFixer 同装 | 无功能冲突 | 本模组与 PacketFixer 互不依赖，可共存；本模组 4 个 Mixin 均设 `priority = 1100`，对同一闸门的修改始终以本模组的值为准（日志里可能有一条 "ModifyConstant conflict ... Skipping packetfixer ..." 的 WARN，属正常，无需处理） |
+| 与 PacketFixer 同装 | 重复修改相同网络类 | 删除 PacketFixer，仅保留本模组；本模组已包含其 NeoForge 1.21.x 功能 |
 
 ## 构建
 
@@ -85,23 +99,23 @@ maxPacketSize = 67108864
 gradlew build
 ```
 
-产物：`build/libs/raisepacketlimit-1.0.0.jar`
+产物：`build/libs/raisepacketlimit-1.1.0.jar`
 
 ## 技术实现
 
-- 4 个 Mixin（sponge-mixin，NeoForge 内置），目标类均为客户端/服务端共有的 `net.minecraft.network.*`
-  类，单个 jar 两端通用，无 dist 隔离问题：
+- 18 个 Mixin（sponge-mixin，NeoForge 内置），单个 jar 同时适用于客户端和服务端：
   - `CompressionEncoderMixin`、`CompressionDecoderMixin`：`@ModifyConstant` 替换 `8388608` 字面量为配置值。
   - `Varint21LengthFieldPrependerMixin`、`Varint21FrameDecoderMixin`：`@ModifyConstant` 替换 `3` 字面量为 `5`。
 - 常量均为编译期内联字面量，故按方法逐个 `@ModifyConstant` 修改，不依赖字段引用。
 - 配置通过 `ModConfigSpec`（`mods.toml` 注册，`config/raisepacketlimit.toml`），
   Mixin 读取静态持有类 `PacketSizeLimits` 的值（默认即 64 MiB，配置加载后同步）。
 - `mixin 配置 defaultRequire = 0`：个别环境目标缺失时仅告警，不崩溃。
-- 4 个 Mixin 均设置 `priority = 1100`（高于 PacketFixer 的 1001 与默认值 1000）：
-  与 PacketFixer 同时安装时，对同一闸门的注入以本模组为准，行为确定且不受 PacketFixer 配置影响。
+- 四个核心帧/压缩 Mixin 设置 `priority = 1100`，确保其配置的帧大小与压缩上限保持一致。
 - **无 refmap**：NeoForge 1.21 开发与运行环境均为 Mojang 官方映射（mojmap），
   mixin 目标名处处一致，refmap 无意义（见 NeoForge 官方 1.21 迁移说明），
   因此构建不启用 mixin 注解处理器，jar 内不包含 refmap——这是正常且推荐的做法。
+- 另整合 Packet Fixer 的 14 个 NeoForge 1.21.x Mixin：自定义 Payload、NBT 读取、区块包、字符串、连接读超时、登录/心跳超时与 VarInt/VarLong 守卫。VarInt 和 VarLong 保持协议规定的 5/10 字节宽度，不能安全地“无限扩大”。
+- Packet Fixer 的 MIT 版权和许可声明将随 JAR 一起分发，源文件位于 [`src/main/resources/THIRD_PARTY_NOTICES.md`](src/main/resources/THIRD_PARTY_NOTICES.md)。
 
 ## 许可
 

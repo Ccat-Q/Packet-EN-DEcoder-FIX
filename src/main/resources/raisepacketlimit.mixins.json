@@ -3,10 +3,24 @@
   "minVersion": "0.8",
   "package": "com.ccatq.raisepacketlimit.mixin",
   "mixins": [
+    "ByteBufCodecsMixin",
+    "ClientboundCustomPayloadPacketMixin",
+    "ClientboundCustomQueryPacketMixin",
+    "ClientboundLevelChunkPacketDataMixin",
     "CompressionEncoderMixin",
     "CompressionDecoderMixin",
+    "ConnectionMixin",
+    "FriendlyByteBufMixin",
+    "NbtAccounterMixin",
+    "ServerboundCustomPayloadPacketMixin",
+    "ServerboundCustomQueryPacketMixin",
+    "ServerCommonPacketListenerImplMixin",
+    "ServerGamePacketListenerImplMixin",
+    "ServerLoginPacketListenerImplMixin",
     "Varint21LengthFieldPrependerMixin",
-    "Varint21FrameDecoderMixin"
+    "Varint21FrameDecoderMixin",
+    "VarIntMixin",
+    "VarLongMixin"
   ],
   "injectors": {
     "defaultRequire": 0
